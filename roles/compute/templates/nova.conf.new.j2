@@ -1,0 +1,107 @@
+{% set head_node = hostvars[groups['openstack_controller'][0]] %}
+
+
+[DEFAULT]
+my_ip={{ ansible_default_ipv4.address }}
+notification_driver=ceilometer.compute.nova_notifier
+notification_driver=nova.openstack.common.notifier.rpc_notifier
+amqp_durable_queues=False
+rabbit_host={{ head_node.ansible_default_ipv4.address }}
+rabbit_port=5672
+rabbit_hosts={{ head_node.ansible_default_ipv4.address }}5672
+rabbit_use_ssl=False
+rabbit_userid=guest
+rabbit_password=guest
+rabbit_virtual_host=/
+rabbit_ha_queues=False
+notification_driver=
+notification_topics=notifications
+rpc_backend=nova.openstack.common.rpc.impl_kombu
+default_availability_zone=compute7
+notify_api_faults=False
+state_path=/var/lib/nova
+report_interval=10
+compute_manager=nova.compute.manager.ComputeManager
+service_down_time=60
+rootwrap_config=/etc/nova/rootwrap.conf
+auth_strategy=keystone
+reserved_host_memory_mb=512
+network_api_class=nova.network.neutronv2.api.API
+default_floating_pool=public
+force_snat_range=0.0.0.0/0
+metadata_host={{ head_node.ansible_default_ipv4.address }}
+dhcp_domain=novalocal
+security_group_api=neutron
+lock_path=/var/lib/nova/tmp
+debug=False
+verbose=True
+log_dir=/var/log/nova
+use_syslog=False
+compute_driver=libvirt.LibvirtDriver
+vif_plugging_is_fatal=True
+vif_plugging_timeout=300
+firewall_driver=nova.virt.firewall.NoopFirewallDriver
+force_raw_images=True
+novncproxy_base_url=http://{{ head_node.ansible_default_ipv4.address }}:6080/vnc_auto.html
+vncserver_listen=0.0.0.0
+vncserver_proxyclient_address={{ ansible_fqdn }}
+vnc_enabled=True
+vnc_keymap=en-us
+volume_api_class=nova.volume.cinder.API
+sql_connection=mysql://{{ head_node.ansible_default_ipv4.address }}/nova
+image_service=nova.image.glance.GlanceImageService
+[baremetal]
+[cells]
+[cinder]
+[conductor]
+[ephemeral_storage_encryption]
+[glance]
+api_servers={{ head_node.ansible_default_ipv4.address }}:9292
+[hyperv]
+[image_file_url]
+[ironic]
+[keymgr]
+[keystone_authtoken]
+[libvirt]
+libvirt_type=kvm
+compute_driver=libvirt.LibvirtDriver
+instance_name_template=%(hostname)s-%(uuid)s
+api_paste_config=/etc/nova/api-paste.ini
+images_type = rbd
+images_rbd_pool = volumes
+images_rbd_ceph_conf = /etc/ceph/ceph.conf
+rbd_user = cinder
+rbd_secret_uuid = {{ rbd_secret_uuid }}
+virt_type=kvm
+inject_password = false
+inject_key = false
+inject_partition = -2
+live_migration_uri=qemu+tcp://nova@%s/system
+live_migration_flag="VIR_MIGRATE_UNDEFINE_SOURCE,VIR_MIGRATE_PEER2PEER,VIR_MIGRATE_LIVE,VIR_MIGRATE_PERSIST_DEST"
+cpu_mode=host-passthrough
+vif_driver=nova.virt.libvirt.vif.LibvirtGenericVIFDriver
+[matchmaker_redis]
+[matchmaker_ring]
+[metrics]
+[neutron]
+url=http://{{ head_node.ansible_default_ipv4.address }}:9696
+url_timeout=30
+admin_username=neutron
+admin_password=6152b321fa2843b1
+admin_tenant_name=services
+region_name=RegionOne
+admin_auth_url=http://{{ head_node.ansible_default_ipv4.address }}:35357/v2.0
+auth_strategy=keystone
+ovs_bridge=br-int
+extension_sync_interval=600
+default_tenant_id=default
+[osapi_v3]
+[rdp]
+[serial_console]
+[spice]
+[ssl]
+[trusted_computing]
+[upgrade_levels]
+[vmware]
+[xenserver]
+[zookeeper]

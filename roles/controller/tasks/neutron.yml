@@ -1,0 +1,88 @@
+---
+# Tasks for the neutron controller node
+
+- name: Install packages for neutron
+  yum: name={{ item }} state=installed
+  with_items:
+   - openstack-neutron
+   - openstack-neutron-openvswitch
+
+
+- name: Enable ipv4 forwarding in the host
+  sysctl: name=net.ipv4.ip_forward value=1 reload=yes
+
+- name: Setup DB for neutron
+  shell: /usr/bin/neutron-server-setup -q {{ neutron_db_pass }} -r " " -u neutron --plugin openvswitch -y
+         creates=/var/lib/mysql/ovs_neutron
+
+- name: Give right to neutron user.
+  mysql_user: name=neutron password={{ neutron_db_pass }} priv=*.*:ALL host='localhost' state=present
+
+- name: Give right to neutron user.
+  mysql_user: name=neutron password={{ neutron_db_pass }} priv=*.*:ALL host='%' state=present
+
+- name: Copy the neutron.conf  configuration files
+  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf
+  notify:  restart neutron
+  tags: test
+
+- name: Copy the neutron dhcp agent configuration files
+  template: src=dhcp_agent.ini.j2 dest=/etc/neutron/dhcp_agent.ini
+  notify:  restart neutron
+
+
+- name: Copy the neutron ovs agent configuration files
+  template: src=ovs_neutron_plugin.ini.j2 dest=/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+  notify:  restart neutron
+
+- name: Create the external bridges for openvswitch
+  shell: /usr/bin/ovs-vsctl add-br br-ex; touch /etc/neutron/br-ex.created
+         creates=/etc/neutron/br-ex.created
+
+- name: Create the internal bridges for openvswitch
+  shell: /usr/bin/ovs-vsctl add-br br-int; touch /etc/neutron/br-int.created
+         creates=/etc/neutron/br-int.created
+
+- name: Add the interface for the external bridge
+  shell: /usr/bin/ovs-vsctl add-port br-ex {{ neutron_external_interface }}; touch /etc/neutron/br-ext.interface
+         creates=/etc/neutron/br-ext.interface
+
+- name: copy configuration file for nova
+  template: src=nova.conf.j2 dest=/etc/nova/nova.conf
+  notify: restart nova
+
+- name: Start the neutron services
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+   - neutron-server
+   - neutron-dhcp-agent
+   - neutron-openvswitch-agent
+
+- local_action: pause seconds=20
+
+- name: create the external network
+  neutron_network: state=present login_username={{ admin_tenant_user }} login_password={{ admin_pass }} provider_network_type=local
+                   login_tenant_name={{ admin_tenant }} name={{ external_network_name }} router_external=true
+  register: network
+
+- name: create external router
+  neutron_router: state=present login_username={{ admin_tenant_user }} login_password={{ admin_pass }}
+                  login_tenant_name={{ admin_tenant }} name={{ external_router_name }}
+  register: router
+
+- name: create the subnet for external  network
+  neutron_subnet: state=present login_username={{ admin_tenant_user }} login_password={{ admin_pass }}
+                  login_tenant_name={{ admin_tenant }} enable_dhcp=false network_name={{ external_network_name }}
+                  name={{ external_subnet_name }} cidr={{ external_subnet_cidr }}
+
+- name: Copy the neutron l3 agent configuration files
+  template: src=l3_agent.ini.j2 dest=/etc/neutron/l3_agent.ini
+  notify:  restart neutron
+
+- name: Start the neutron l3 services
+  service: name=neutron-l3-agent state=started enabled=yes
+
+- name: create external interface for router
+  neutron_router_gateway: state=present login_username={{ admin_tenant_user }} login_password={{ admin_pass }}
+                          login_tenant_name={{ admin_tenant }} router_name={{ external_router_name }}
+                          network_name={{ external_network_name }}

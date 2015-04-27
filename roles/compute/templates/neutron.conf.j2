@@ -1,0 +1,44 @@
+{% set head_node = hostvars[groups['openstack_controller'][0]] %}
+
+[DEFAULT]
+verbose = True
+debug = False
+use_syslog = False
+log_dir =/var/log/neutron
+bind_host = 0.0.0.0
+bind_port = 9696
+core_plugin =neutron.plugins.ml2.plugin.Ml2Plugin
+service_plugins =neutron.services.l3_router.l3_router_plugin.L3RouterPlugin
+auth_strategy = keystone
+base_mac = fa:16:3e:00:00:00
+mac_generation_retries = 16
+dhcp_lease_duration = 86400
+dhcp_agent_notification = True
+allow_bulk = True
+allow_pagination = False
+allow_sorting = False
+allow_overlapping_ips = True
+dhcp_agents_per_network = 1
+use_ssl = False
+kombu_reconnect_delay=1.0
+rabbit_host={{ head_node.ansible_default_ipv4.address }}
+rabbit_port=5672
+rabbit_hosts={{ head_node.ansible_default_ipv4.address }}:5672
+rabbit_use_ssl=False
+rabbit_userid=guest
+rabbit_password=guest
+rabbit_virtual_host=/
+rabbit_ha_queues=False
+rpc_backend=neutron.openstack.common.rpc.impl_kombu
+control_exchange=neutron
+[matchmaker_redis]
+[matchmaker_ring]
+[quotas]
+[agent]
+root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
+report_interval = 30
+[keystone_authtoken]
+[database]
+[service_providers]
+service_provider=LOADBALANCER:Haproxy:neutron.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
+service_provider=VPN:openswan:neutron.services.vpn.service_drivers.ipsec.IPsecVPNDriver:default

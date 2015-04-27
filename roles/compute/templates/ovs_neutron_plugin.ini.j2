@@ -1,0 +1,18 @@
+[ovs]
+#network_vlan_ranges = physnet1
+enable_tunneling = True
+integration_bridge = br-int
+tunnel_bridge = br-tun
+local_ip = {{ ansible_default_ipv4.address }}
+#bridge_mappings =physnet1:br-ex
+
+[agent]
+polling_interval = 2
+tunnel_types =vxlan
+vxlan_udp_port =4789
+l2_population = False
+arp_responder = False
+enable_distributed_routing = False
+
+[securitygroup]
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver

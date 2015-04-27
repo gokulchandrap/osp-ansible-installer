@@ -1,0 +1,19 @@
+[ml2]
+type_drivers = vxlan,flat,vlan
+tenant_network_types = vxlan
+mechanism_drivers =openvswitch
+
+[ml2_type_flat]
+flat_networks = *
+
+[ml2_type_vlan]
+network_vlan_ranges = {{provider_vlan_mapping}}
+
+[ml2_type_gre]
+
+[ml2_type_vxlan]
+vni_ranges =10:1000
+vxlan_group =224.0.0.1
+
+[securitygroup]
+enable_security_group = True
