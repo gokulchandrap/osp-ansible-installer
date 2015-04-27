@@ -122,14 +122,14 @@ if [[ -z "$DISABLE_ENDPOINTS" ]]; then
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:9292"
 fi
 #
-# Quantum service
+# neutron service
 #
-QUANTUM_SERVICE=$(get_id \
-keystone service-create --name=quantum \
+neutron_SERVICE=$(get_id \
+keystone service-create --name=neutron \
                         --type=network \
                         --description="Quantun Network Service")
 if [[ -z "$DISABLE_ENDPOINTS" ]]; then
-    keystone endpoint-create --region RegionOne --service-id $QUANTUM_SERVICE \
+    keystone endpoint-create --region RegionOne --service-id $neutron_SERVICE \
         --publicurl "http://$CONTROLLER_PUBLIC_ADDRESS:9696" \
         --adminurl "http://$CONTROLLER_ADMIN_ADDRESS:9696" \
         --internalurl "http://$CONTROLLER_INTERNAL_ADDRESS:9696"

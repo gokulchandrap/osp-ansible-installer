@@ -10,8 +10,8 @@ glance_filesystem_store_datadir: /var/lib/glance/images/
 nova_db_pass: Eawjoof2
 nova_libvirt_type: kvm
 
-quantum_db_pass: poufujusio
-quantum_external_interface: eth1
+neutron_db_pass: poufujusio
+neutron_external_interface: eth1
 
 cinder_db_pass: gamBefcel
 cinder_volume_dev: /dev/md127
@@ -26,3 +26,6 @@ external_router_name: external_router
 admin_tenant: admin
 admin_tenant_user: admin
 admin_pass: waxDoptewv
+
+provider_vlan_mappings: physnet1:1710:1710
+rbd_secret_uuid:a55656e7-74b4-4e59-936f-3775ac4ea4e3

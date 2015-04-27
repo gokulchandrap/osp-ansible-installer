@@ -20,13 +20,13 @@
    - openstack-nova-console
    - openstack-nova-conductor
 
-- name: restart quantum
+- name: restart neutron
   service: name={{ item }} state=restarted 
   with_items:
-   - quantum-server
-   - quantum-l3-agent
-   - quantum-dhcp-agent
-   - quantum-openvswitch-agent
+   - neutron-server
+   - neutron-l3-agent
+   - neutron-dhcp-agent
+   - neutron-openvswitch-agent
 
 - name: restart cinder
   service: name={{ item }} state=restarted enabled=yes

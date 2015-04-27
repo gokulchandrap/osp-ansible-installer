@@ -26,24 +26,27 @@
   yum: name={{ item }} state=installed
   with_items:
    - openstack-nova-compute
-   - openstack-quantum-openvswitch
+   - openstack-neutron-openvswitch
 
 - name: Create the internal bridges for openvswitch
-  shell: creates=/etc/quantum/br-int.created /usr/bin/ovs-vsctl add-br br-int; touch /etc/quantum/br-int.created
+  shell: creates=/etc/neutron/br-int.created /usr/bin/ovs-vsctl add-br br-int; touch /etc/neutron/br-int.created
 
-- name: Copy the quantum.conf  configuration files
-  template: src=roles/controller/templates/quantum.conf.j2 dest=/etc/quantum/quantum.conf
+- name: Copy the neutron.conf  configuration files
+  template: src=neutron.conf.j2 dest=/etc/neutron/neutron.conf
 
-- name: Copy the quantum ovs agent configuration files
-  template: src=ovs_quantum_plugin.ini.j2 dest=/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini
-  notify:  restart quantum ovsagent
+- name: Copy the neutron ovs agent configuration files
+  template: src=ovs_neutron_plugin.ini.j2 dest=/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini
+  notify:  restart neutron ovsagent
 
 - name: Copy the nova configuration files
-  template: src=nova.conf.j2 dest=/etc/nova/nova.conf
+  template: src=nova.conf.new.j2 dest=/etc/nova/nova.conf
   notify:  restart nova compute
 
 - name: Give permissions to lock folder
   file: path=/var/lock state=directory owner=root group=root mode=0777
 
-- name: Copy the modified file for key injection bug
-  copy: src=guestfs.py dest=/usr/lib/python2.6/site-packages/nova/virt/disk/vfs/
+#- name: Copy the modified file for key injection bug
+#  copy: src=guestfs.py dest=/usr/lib/python2.6/site-packages/nova/virt/disk/vfs/
+
+- name: copy iptables
+  template: src=iptables.j2 dest=/etc/sysconfig/iptables 
